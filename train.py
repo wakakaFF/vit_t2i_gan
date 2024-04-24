@@ -19,7 +19,7 @@ from torch.utils.tensorboard import SummaryWriter
 
 def train(modelConfig):
     adversarial_loss = torch.nn.MSELoss()
-    tb_writer = SummaryWriter(log_dir='runs/xray_3')
+    tb_writer = SummaryWriter(log_dir='runs/xray_5')
 
     device = torch.device(modelConfig["device"])
     train_transform = transforms.Compose([
@@ -38,16 +38,19 @@ def train(modelConfig):
 
     generator = VITGAN(modelConfig).to(device)
     # optimizerG = torch.optim.Adam(generator.parameters(), lr=modelConfig['lr_g'], weight_decay=1e-4)
-    optimizerG = torch.optim.SGD(generator.parameters(), lr=modelConfig['lr_g'])
+    optimizerG = torch.optim.SGD(generator.parameters(), lr=modelConfig['lr_g'], weight_decay=1e-4)
+    torch.optim.lr_scheduler.StepLR(optimizerG, step_size=10, gamma=0.9, last_epoch=-1)
+
     generator_test = VITGAN(modelConfig).to(device)
+
+    discriminator = Discriminator().to(device)
+    # optimizerD = torch.optim.Adam(discriminator.parameters(), lr=modelConfig['lr_d'], weight_decay=1e-4)
+    optimizerD = torch.optim.SGD(discriminator.parameters(), lr=modelConfig['lr_d'], weight_decay=1e-4)
+    torch.optim.lr_scheduler.StepLR(optimizerD, step_size=3, gamma=0.5, last_epoch=-1)
 
     init_report = torch.zeros((1, 64, 768), device=device)
     init_img = torch.zeros((1, 3, 256, 256), device=device)
     tb_writer.add_graph(generator, [init_img, init_report])
-
-    discriminator = Discriminator().to(device)
-    # optimizerD = torch.optim.Adam(discriminator.parameters(), lr=modelConfig['lr_d'], weight_decay=1e-4)
-    optimizerD = torch.optim.SGD(discriminator.parameters(), lr=modelConfig['lr_d'])
 
     eval_noise = torch.randn((1, 3, 256, 256)).cuda()
 
@@ -87,6 +90,7 @@ def train(modelConfig):
                 errD = (errD_fake + errD_real) / 2
                 # errD.backward()
                 optimizerD.step()
+
 
                 tqdmDataloader.set_postfix(ordered_dict={
                     "epoch": i,

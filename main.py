@@ -22,8 +22,8 @@ def main(dataset='xray'):
             # time_steps
             "num_time_steps": 4,
             # optimizer
-            "lr_g": 0.0001,
-            "lr_d": 0.00003,
+            "lr_g": 0.001,
+            "lr_d": 0.0003,
             "beta_min": 0.5,
             "beta_max": 0.999,
             "use_geometric": False,
@@ -42,7 +42,7 @@ def main(dataset='xray'):
             # file
             'dataset_root': 'D:/Code/data/Xray/Xray',
             "save_weight_dir": "./Checkpoints_xray/",
-            "save_img": "./save_images",
+            "save_img": "./save_images_2",
             "device": "cuda",
             "training_load_weight": None,
             "labels": ("persistent stable right basilar atelectasis . low lung volumes and patient rotation . given "
